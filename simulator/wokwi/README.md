@@ -11,23 +11,15 @@ pio run
 ```
 Dit produceert: `.pio/build/esp32dev/firmware.bin`
 
-### 2. Wokwi Openen
-**Optie A: Via Browser (aanbevolen)**
-1. Ga naar https://wokwi.com/projects/new/esp32
-2. Klik op "Load Project" → selecteer `diagram.json` uit deze map
-3. Klik op het firmware icoon (📁) → selecteer `../../firmware/.pio/build/esp32dev/firmware.bin`
-4. Druk op **Play** (▶️)
+### 2. Wokwi Openen (Browser - Eenige Optie)
+1. Ga naar **https://wokwi.com/projects/new/esp32**
+2. Klik op **"Load Project"** → selecteer `diagram.json` uit deze map
+3. Klik op het **firmware icoon (📁)** → selecteer `../../firmware/.pio/build/esp32dev/firmware.bin`
+4. Druk op **Play (▶️)**
 
-**Optie B: Wokwi CLI (voor automatisering)**
-```bash
-# Installeer Wokwi CLI
-npm install -g @wokwi/cli
+> **Note:** Er is **geen CLI** voor Wokwi. De simulator draait volledig in de browser. Voor CI/CD kan je Wokwi's GitHub Action gebruiken (zie https://docs.wokwi.com/ci).
 
-# Run simulatie
-wokwi run --firmware ../../firmware/.pio/build/esp32dev/firmware.bin diagram.json
-```
-
-## 🔌 Pinout (Option B - مطابقt met hardware)
+## 🔌 Pinout (Option B - Overeenkomend met hardware)
 
 | Component | Wokwi Part | GPIO | Type |
 |-----------|------------|------|------|
@@ -83,15 +75,6 @@ wokwi run --firmware ../../firmware/.pio/build/esp32dev/firmware.bin diagram.jso
 6. **Emergency Stop** — Pushbutton indrukken → motoren moeten direct stoppen
 
 7. **WebSocket Test** — Externe client verbinden met Wokwi's virtuele IP
-
-### Geautomatiseerd (Wokwi CLI + Script):
-```bash
-# Voorbeeld test script
-wokwi run --firmware ../../firmware/.pio/build/esp32dev/firmware.bin diagram.json \
-  --timeout 30s \
-  --expect-serial "MPU6050 connected OK" \
-  --expect-serial "AP Started"
-```
 
 ## 🐛 Debuggen in Wokwi
 
