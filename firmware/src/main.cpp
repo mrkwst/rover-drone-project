@@ -8,8 +8,8 @@
  * Hardware: Zie pinout.h
  * 
  * Protocol (JSON over WebSocket):
- * Pi → ESP32 (10-50Hz): {"T":100,"L":180,"R":175,"M":1}
- * ESP32 → Pi (50-100Hz): {"t":12345,"dF":45,"dR":120,"bat":11.3,"imu":{"r":1,"p":-2},"enc":{"L":450,"R":448}}
+ * Pi -> ESP32 (10-50Hz): {"T":100,"S":0,"M":0}
+ * ESP32 -> Pi (50-100Hz): {"t":12345,"dF":45,"dR":120,"bat":11.3,"imu":{"r":1,"p":-2},"enc":{"L":450,"R":448}}
  */
 
 #include <Arduino.h>
@@ -25,10 +25,16 @@
 #include <PID_v1.h>
 #include <esp_task_wdt.h>  // Task Watchdog Timer
 
+// ==================== FORWARD DECLARATIONS ====================
+void apply_pid_output();
+void handle_ws_command(const char* json_str);
+void ws_on_event(AsyncWebSocket *server, AsyncWebSocketClient *client, 
+                 AwsEventType type, void *arg, uint8_t *data, size_t len);
+
 // ==================== GLOBAL OBJECTS ====================
 AsyncWebServer server(WS_PORT);
 AsyncWebSocket ws("/ws");
-MPU6050 mpu(&Wire1);  // Use Wire1 (GPIO 16/17) not default Wire (GPIO 21/22)
+MPU6050 mpu(MPU6050_DEFAULT_ADDRESS, &Wire1);  // Use Wire1 (GPIO 16/17)
 
 // ==================== MOTOR CONTROL ====================
 struct MotorState {
@@ -239,10 +245,10 @@ void read_mpu6050() {
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Converteer naar fysieke eenheden
-  sensors.accel_x = ax / 16384.0;  // ±2g range
+  sensors.accel_x = ax / 16384.0;  // +-2g range
   sensors.accel_y = ay / 16384.0;
   sensors.accel_z = az / 16384.0;
-  sensors.gyro_x = gx / 131.0;     // ±250°/s range
+  sensors.gyro_x = gx / 131.0;     // +-250 deg/s range
   sensors.gyro_y = gy / 131.0;
   sensors.gyro_z = gz / 131.0;
   
@@ -343,7 +349,7 @@ void ws_on_event(AsyncWebSocket *server, AsyncWebSocketClient *client,
 }
 
 void handle_ws_command(const char* json_str) {
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;
   DeserializationError err = deserializeJson(doc, json_str);
   if (err) {
     Serial.printf("WS JSON parse error: %s\n", err.c_str());
@@ -381,7 +387,7 @@ void handle_ws_command(const char* json_str) {
 void send_telemetry() {
   if (!ws_connected) return;
   
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
   doc["t"] = millis();
   doc["dF"] = sensors.dist_front;
   doc["dR"] = sensors.dist_rear;
@@ -406,9 +412,14 @@ void send_telemetry() {
 void core0_task(void *pvParameters) {
   Serial.println("Core 0: Real-time loop started (1kHz)");
   
-  // Enable Task Watchdog Timer for this task
-  esp_task_wdt_init(3, true);  // 3 second timeout, panic on timeout
-  esp_task_wdt_add(NULL);      // Add current task to watchdog
+  // Enable Task Watchdog Timer for this task (new ESP-IDF API)
+  esp_task_wdt_config_t wdt_config = {
+    .timeout_ms = 3000,
+    .idle_core_mask = 0,
+    .trigger_panic = true
+  };
+  esp_task_wdt_init(&wdt_config);
+  esp_task_wdt_add(NULL);  // Add current task to watchdog
   
   const TickType_t interval = pdMS_TO_TICKS(1);  // 1ms = 1kHz
   TickType_t last_wake = xTaskGetTickCount();
@@ -469,11 +480,9 @@ void setup() {
   pinMode(PIN_MOTOR_BIN1, OUTPUT);
   pinMode(PIN_MOTOR_BIN2, OUTPUT);
   
-  // PWM setup (LEDc)
-  ledcSetup(0, MOTOR_PWM_FREQ, MOTOR_PWM_RES);  // Channel 0 -> PWMA
-  ledcSetup(1, MOTOR_PWM_FREQ, MOTOR_PWM_RES);  // Channel 1 -> PWMB
-  ledcAttachPin(PIN_MOTOR_PWMA, 0);
-  ledcAttachPin(PIN_MOTOR_PWMB, 1);
+  // PWM setup (LEDC new API)
+  ledcAttachChannel(PIN_MOTOR_PWMA, MOTOR_PWM_FREQ, MOTOR_PWM_RES, 0);
+  ledcAttachChannel(PIN_MOTOR_PWMB, MOTOR_PWM_FREQ, MOTOR_PWM_RES, 1);
   
   motor_enable(false);
   
@@ -513,7 +522,7 @@ void setup() {
   // Emergency stop (active LOW with pull-up)
   pinMode(PIN_EMERGENCY_STOP, INPUT_PULLUP);
   
-  // I2C voor MPU6050 (op alternatieve pinnen!)
+  // I2C voor MPU6050 (op alternatieve pinnen - Wire1)
   Wire1.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
   
   // Status LED
