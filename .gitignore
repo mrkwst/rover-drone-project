@@ -60,4 +60,5 @@ cad/*.stp
 *secret*
 *.key
 *.pem
-.env
+.envget-platformio.py
+get-platformio.py
