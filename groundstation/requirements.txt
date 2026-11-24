@@ -1,0 +1,18 @@
+# Ground Station Dependencies
+# Install: pip install -r requirements.txt
+
+# WebSocket client
+websockets>=12.0
+
+# Optional: voor joystick control
+pygame>=2.5.0
+
+# Optional: voor data logging/visualisatie
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+
+# Optional: FastAPI backend (voor volledige ground station)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+opencv-python>=4.8.0

@@ -1,0 +1,63 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Build artifacts
+*.elf
+*.bin
+*.hex
+*.map
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+env/
+ENV/
+
+# Ground station virtual environment
+groundstation/.venv/
+groundstation/venv/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# CAD exports (large files)
+cad/*.stl
+cad/*.step
+cad/*.stp
+
+# Secrets (API keys, passwords)
+*secret*
+*.key
+*.pem
+.env
