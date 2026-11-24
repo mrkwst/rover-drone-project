@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "author": "Rover-Drone Project",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkitc-v1",
+      "id": "esp",
+      "top": 50,
+      "left": 100,
+      "attrs": {}
+    },
+    {
+      "type": "tb6612fng",
+      "id": "motor_driver",
+      "top": 250,
+      "left": 50,
+      "attrs": {}
+    },
+    {
+      "type": "dc-motor",
+      "id": "motor_left",
+      "top": 250,
+      "left": 350,
+      "attrs": {}
+    },
+    {
+      "type": "dc-motor",
+      "id": "motor_right",
+      "top": 350,
+      "left": 350,
+      "attrs": {}
+    },
+    {
+      "type": "encoder",
+      "id": "enc_left",
+      "top": 200,
+      "left": 450,
+      "attrs": {}
+    },
+    {
+      "type": "encoder",
+      "id": "enc_right",
+      "top": 300,
+      "left": 450,
+      "attrs": {}
+    },
+    {
+      "type": "hc-sr04",
+      "id": "us_front",
+      "top": 50,
+      "left": 400,
+      "attrs": {}
+    },
+    {
+      "type": "hc-sr04",
+      "id": "us_rear",
+      "top": 150,
+      "left": 400,
+      "attrs": {}
+    },
+    {
+      "type": "mpu6050",
+      "id": "imu",
+      "top": 50,
+      "left": 550,
+      "attrs": {}
+    },
+    {
+      "type": "ir-reflectance-sensor",
+      "id": "line_l2",
+      "top": 300,
+      "left": 550,
+      "attrs": {}
+    },
+    {
+      "type": "ir-reflectance-sensor",
+      "id": "line_l1",
+      "top": 330,
+      "left": 550,
+      "attrs": {}
+    },
+    {
+      "type": "ir-reflectance-sensor",
+      "id": "line_r1",
+      "top": 360,
+      "left": 550,
+      "attrs": {}
+    },
+    {
+      "type": "ir-reflectance-sensor",
+      "id": "line_r2",
+      "top": 390,
+      "left": 550,
+      "attrs": {}
+    },
+    {
+      "type": "voltage-source",
+      "id": "bat_sim",
+      "top": 450,
+      "left": 100,
+      "attrs": {
+        "voltage": "7.4"
+      }
+    },
+    {
+      "type": "pushbutton",
+      "id": "estop_btn",
+      "top": 450,
+      "left": 250,
+      "attrs": {}
+    },
+    {
+      "type": "buzzer",
+      "id": "buzzer",
+      "top": 450,
+      "left": 400,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    ["esp:5V", "motor_driver:VCC", "rgb(255,0,0)"],
+    ["esp:GND.1", "motor_driver:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "imu:VCC", "rgb(255,165,0)"],
+    ["esp:GND.2", "imu:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "us_front:VCC", "rgb(255,165,0)"],
+    ["esp:GND.3", "us_front:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "us_rear:VCC", "rgb(255,165,0)"],
+    ["esp:GND.4", "us_rear:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "line_l2:VCC", "rgb(255,165,0)"],
+    ["esp:GND.5", "line_l2:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "line_l1:VCC", "rgb(255,165,0)"],
+    ["esp:GND.6", "line_l1:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "line_r1:VCC", "rgb(255,165,0)"],
+    ["esp:GND.7", "line_r1:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "line_r2:VCC", "rgb(255,165,0)"],
+    ["esp:GND.8", "line_r2:GND", "rgb(0,0,0)"],
+    ["esp:3V3", "estop_btn:1", "rgb(255,165,0)"],
+    ["esp:GND.9", "buzzer:GND", "rgb(0,0,0)"],
+    ["esp:D4", "motor_driver:STBY", "rgb(0,255,0)"],
+    ["esp:D5", "motor_driver:AIN1", "rgb(0,255,0)"],
+    ["esp:D18", "motor_driver:AIN2", "rgb(0,255,0)"],
+    ["esp:D19", "motor_driver:PWMA", "rgb(0,255,0)"],
+    ["esp:D21", "motor_driver:BIN1", "rgb(0,255,0)"],
+    ["esp:D22", "motor_driver:BIN2", "rgb(0,255,0)"],
+    ["esp:D23", "motor_driver:PWMB", "rgb(0,255,0)"],
+    ["motor_driver:AO1", "motor_left:1", "rgb(255,0,0)"],
+    ["motor_driver:AO2", "motor_left:2", "rgb(255,0,0)"],
+    ["motor_driver:BO1", "motor_right:1", "rgb(255,0,0)"],
+    ["motor_driver:BO2", "motor_right:2", "rgb(255,0,0)"],
+    ["bat_sim:VCC", "motor_driver:VM", "rgb(255,0,0)"],
+    ["bat_sim:GND", "motor_driver:GND", "rgb(0,0,0)"],
+    ["esp:D14", "enc_left:A", "rgb(0,0,255)"],
+    ["esp:D25", "enc_left:B", "rgb(0,0,255)"],
+    ["esp:3V3", "enc_left:VCC", "rgb(255,165,0)"],
+    ["esp:GND.10", "enc_left:GND", "rgb(0,0,0)"],
+    ["enc_left:OUT", "motor_left:ENC", "rgb(128,128,128)"],
+    ["esp:D26", "enc_right:A", "rgb(0,0,255)"],
+    ["esp:D27", "enc_right:B", "rgb(0,0,255)"],
+    ["esp:3V3", "enc_right:VCC", "rgb(255,165,0)"],
+    ["esp:GND.11", "enc_right:GND", "rgb(0,0,0)"],
+    ["enc_right:OUT", "motor_right:ENC", "rgb(128,128,128)"],
+    ["esp:D13", "us_front:TRIG", "rgb(255,0,255)"],
+    ["esp:D12", "us_front:ECHO", "rgb(255,0,255)"],
+    ["esp:D2", "us_rear:TRIG", "rgb(255,0,255)"],
+    ["esp:D15", "us_rear:ECHO", "rgb(255,0,255)"],
+    ["esp:D16", "imu:SDA", "rgb(0,255,255)"],
+    ["esp:D17", "imu:SCL", "rgb(0,255,255)"],
+    ["esp:D36", "line_l2:OUT", "rgb(0,255,0)"],
+    ["esp:VN", "line_l1:OUT", "rgb(0,255,0)"],
+    ["esp:D34", "line_r1:OUT", "rgb(0,255,0)"],
+    ["esp:D35", "line_r2:OUT", "rgb(0,255,0)"],
+    ["bat_sim:VCC", "esp:D33", "rgb(255,255,0)"],
+    ["esp:D3", "estop_btn:2", "rgb(255,0,0)"],
+    ["esp:GND.12", "estop_btn:2", "rgb(0,0,0)"],
+    ["esp:D32", "buzzer:VCC", "rgb(255,165,0)"]
+  ],
+  "dependencies": {}
+}
