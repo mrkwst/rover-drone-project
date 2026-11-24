@@ -4,95 +4,95 @@
   "editor": "wokwi",
   "parts": [
     {
-      "type": "board-esp32-devkitc-v1",
+      "type": "wokwi-esp32-devkit-v1",
       "id": "esp",
       "top": 50,
       "left": 100,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "tb6612fng",
       "id": "motor_driver",
       "top": 250,
       "left": 50,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "dc-motor",
       "id": "motor_left",
       "top": 250,
       "left": 350,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "dc-motor",
       "id": "motor_right",
       "top": 350,
       "left": 350,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "encoder",
       "id": "enc_left",
       "top": 200,
       "left": 450,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "encoder",
       "id": "enc_right",
       "top": 300,
       "left": 450,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "hc-sr04",
       "id": "us_front",
       "top": 50,
       "left": 400,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "hc-sr04",
       "id": "us_rear",
       "top": 150,
       "left": 400,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "mpu6050",
       "id": "imu",
       "top": 50,
       "left": 550,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "ir-reflectance-sensor",
       "id": "line_l2",
       "top": 300,
       "left": 550,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "ir-reflectance-sensor",
       "id": "line_l1",
       "top": 330,
       "left": 550,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "ir-reflectance-sensor",
       "id": "line_r1",
       "top": 360,
       "left": 550,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "ir-reflectance-sensor",
       "id": "line_r2",
       "top": 390,
       "left": 550,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "voltage-source",
@@ -108,14 +108,14 @@
       "id": "estop_btn",
       "top": 450,
       "left": 250,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     },
     {
       "type": "buzzer",
       "id": "buzzer",
       "top": 450,
       "left": 400,
-      "attrs": {}
+      "attrs": { "firmware": "../../firmware/.pio/build/esp32dev/firmware.bin" }
     }
   ],
   "connections": [
