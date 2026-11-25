@@ -1,0 +1,53 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Describe what you'd like to see.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - firmware (ESP32)
+        - groundstation (Python)
+        - hardware (mechanical, electrical)
+        - documentation
+        - simulator
+        - ground station UI
+        - autonomy/AI
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve?
+      placeholder: Currently we can't... / It would be useful to...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should it work?
+      placeholder: Add a new mode... / Implement PID tuning via WS...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you've thought of
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact Assessment
+      options:
+        - label: Breaking change (requires firmware re-flash)
+        - label: Hardware change needed
+        - label: Safety critical (affects motor control, battery, etc.)
+        - label: Kid-friendly (good learning opportunity)

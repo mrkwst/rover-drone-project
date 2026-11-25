@@ -1,0 +1,99 @@
+name: CI - Firmware Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  firmware-build:
+    name: Build Firmware
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PlatformIO
+        uses: platformio/platformio-action@v2
+        with:
+          platformio-version: latest
+
+      - name: Build firmware
+        working-directory: ./firmware
+        run: pio run
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-bin
+          path: firmware/.pio/build/esp32dev/firmware.bin
+          retention-days: 30
+
+      - name: Upload firmware ELF (for SimulIDE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-elf
+          path: firmware/.pio/build/esp32dev/firmware.elf
+          retention-days: 30
+
+  firmware-lint:
+    name: Lint Firmware Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PlatformIO
+        uses: platformio/platformio-action@v2
+
+      - name: Run PlatformIO check (cppcheck)
+        working-directory: ./firmware
+        run: pio check --skip-packages
+        continue-on-error: true
+
+  groundstation-test:
+    name: Ground Station Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./groundstation
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Syntax check
+        working-directory: ./groundstation
+        run: python -m py_compile ws_test.py
+
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for required docs
+        run: |
+          test -f README.md || (echo "README.md missing" && exit 1)
+          test -f docs/wiring.md || (echo "docs/wiring.md missing" && exit 1)
+          test -f docs/pinout_reference.md || (echo "docs/pinout_reference.md missing" && exit 1)
+          test -f firmware/src/pinout.h || (echo "firmware/src/pinout.h missing" && exit 1)
+          test -f firmware/src/main.cpp || (echo "firmware/src/main.cpp missing" && exit 1)
+
+  notify:
+    name: Notify on Failure
+    if: failure()
+    needs: [firmware-build, firmware-lint, groundstation-test, docs-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify
+        run: echo "Build failed! Check GitHub Actions for details."

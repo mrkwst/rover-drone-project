@@ -1,0 +1,27 @@
+# Code Owners for automatic review assignment
+# Format: pattern @username
+
+# Firmware - core files
+/firmware/src/main.cpp @mark
+/firmware/src/pinout.h @mark
+/firmware/platformio.ini @mark
+
+# Ground station
+/groundstation/ws_test.py @mark
+/groundstation/requirements.txt @mark
+
+# Documentation
+/docs/ @mark
+/README.md @mark
+
+# Hardware/Wiring docs
+/docs/wiring.md @mark
+/docs/pinout_reference.md @mark
+
+# CI/CD
+/.github/workflows/ @mark
+/.github/dependabot.yml @mark
+
+# Safety-critical - requires review
+/firmware/src/main.cpp @mark
+/firmware/src/pinout.h @mark

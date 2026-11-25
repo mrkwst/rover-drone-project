@@ -1,0 +1,63 @@
+name: Hardware Issue
+description: Report a hardware problem (wiring, components, soldering, etc.)
+title: "[HARDWARE] "
+labels: ["hardware"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hardware issues can be safety-critical. Please provide details.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Power (battery, buck converter, wiring)
+        - Motor Driver (TB6612FNG)
+        - Motors / Encoders
+        - Sensors (US, MPU6050, TCRT5000)
+        - ESP32 Board
+        - Wiring / Breadboard / PCB
+        - Mechanical (chassis, wheels, mounts)
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: What's happening?
+      placeholder: Motor doesn't spin / Sensor reads 0 / Burning smell / etc.
+    validations:
+      required: true
+  - type: textarea
+    id: troubleshooting
+    attributes:
+      label: Troubleshooting Done
+      description: What have you tried?
+      placeholder: |
+        - Checked wiring against docs/pinout_reference.md
+        - Measured voltage at X with multimeter
+        - Verified solder joints
+        - Swapped components
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Multimeter Readings
+      description: Voltage, continuity, resistance measurements
+      placeholder: |
+        Buck output: 5.02V
+        ESP32 3.3V pin: 3.3V
+        TB6612FNG VM: 7.4V
+        Continuity: all GNDs connected
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety Check
+      options:
+        - label: Battery voltage > 6.6V (not deeply discharged)
+        - label: Buck converter set to 5.0V BEFORE connecting ESP32
+        - label: HC-SR04 Echo pins have 1k/2k voltage divider
+        - label: All GNDs connected (star ground)
+        - label: No shorts between VCC and GND

@@ -1,0 +1,62 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill in the details below.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the project is affected?
+      options:
+        - firmware (ESP32)
+        - groundstation (Python)
+        - hardware (wiring, components)
+        - documentation
+        - simulator
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Clear description of the bug
+      placeholder: What happened? What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions
+      placeholder: |
+        1. Connect hardware
+        2. Run command...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Serial Output
+      description: Paste relevant logs or serial monitor output
+      render: text
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware Setup
+      description: What hardware are you using?
+      placeholder: ESP32 DevKitC V1, TB6612FNG, DollaTek chassis, etc.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues
+        - label: I can reproduce this consistently
+        - label: This is a safety-critical issue (motor runaway, battery, etc.)
