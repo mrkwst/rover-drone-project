@@ -14,10 +14,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup PlatformIO
-        uses: platformio/platformio-action@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          platformio-version: latest
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade pip && pip install platformio
 
       - name: Build firmware
         working-directory: ./firmware
@@ -44,8 +47,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup PlatformIO
-        uses: platformio/platformio-action@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade pip && pip install platformio
 
       - name: Run PlatformIO check (cppcheck)
         working-directory: ./firmware
