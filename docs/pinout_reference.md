@@ -19,18 +19,19 @@
   LEGENDA:  ● = gebruikt   ○ = vrij   ⚠ = let op!
 
 ════════════════════════════════════════════════════════════════════════
-MOTOR DRIVER (TB6612FNG)                    ENCODERS (TT Motor 1:48)
+MOTOR DRIVER (TB6612FNG)                    ENCODERS (Pololu 12 CPR, 120:1)
 ════════════════════════════════════════════════════════════════════════
-STBY    → GPIO 4        ●                   Enc LA   → GPIO 14  ● (input, interrupt)
-AIN1    → GPIO 5        ●                   Enc LB   → GPIO 25  ● (input, interrupt)
-AIN2    → GPIO 18       ●                   Enc RA   → GPIO 26  ● (input, interrupt)
-PWMA    → GPIO 19       ● (LEDc Ch 0)       Enc RB   → GPIO 27  ● (input, interrupt)
+STBY    → GPIO 4        ●                   Enc LA   → GPIO 14  ● (via 1k/2k deler)
+AIN1    → GPIO 5        ●                   Enc LB   → GPIO 25  ● (richting, optioneel)
+AIN2    → GPIO 18       ●                   Enc RA   → GPIO 26  ● (via 1k/2k deler)
+PWMA    → GPIO 19       ● (LEDc Ch 0)       Enc RB   → GPIO 27  ● (richting, optioneel)
 BIN1    → GPIO 21       ●
 BIN2    → GPIO 22       ●
 PWMB    → GPIO 23       ● (LEDc Ch 1)
 
-PWM: 20kHz, 10-bit (0-1023)
-Alleen kanaal A (GPIO 14, 26) voor snelheid; kanaal B (25, 27) voor richting (optioneel)
+PWM: 20kHz, 10-bit. Clamp: MOTOR_MAX_DUTY 716 = 70% → 5,9V bij 8,4V accu
+Alleen kanaal A (14, 26) voor snelheid, CHANGE-interrupt (2 flanken)
+2880 ticks/wielomwenteling = 13,10 ticks/mm (70mm wiel, 120:1, 12 CPR)
 
 ═════════════════════════════════════════════════════════════════════════
 ULTRASONIC (HC-SR04)                        MPU6050 (I²C - Wire1)
@@ -65,12 +66,13 @@ Buzzer          → GPIO 32   ● (PWM capable, geen boot conflict)
 ═════════════════════════════════════════════════════════════════════════
 VOEDING
 ═════════════════════════════════════════════════════════════════════════
-2S 18650 (7.4V) ──▶ TB6612FNG VM (direct)
+2S 18650 (7.4V) ──▶ TB6612FNG VM (direct, max 70% duty = 5,9V)
               │
               ├─▶ XL4015 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
               │                          │
               │                          ├─▶ TB6612FNG VCC (via 3.3V reg)
               │                          ├─▶ HC-SR04 VCC (5V)
+              │                          ├─▶ Encoderprintjes VCC (5V)
               │                          └─▶ Sensoren VCC
               │
               └─▶ Spanningsdeler (21:1) ──▶ GPIO 33 (ADC1)
@@ -86,6 +88,7 @@ TESTPUNTEN (na solderen, VOOR power-on)
 ☐ TB6612 VCC = 3.3V
 ☐ HC-SR04 VCC = 5.0V
 ☐ US Echo (met divider) < 3.3V tijdens trigger
+☐ Encoder A na deler: 0 ↔ 3,3V bij draaien (GPIO 14/26)
 ☐ Bat divider uitgang < 0.5V bij 8.4V bat (op GPIO 33)
 ☐ Alle GND = 0Ω onderling
 ☐ Geen kortsluiting VCC-GND
@@ -100,7 +103,7 @@ SOLDER VOLGORDE
 5. Alle GND samen (sterpunt op perboard)
 6. Signaal draden ESP32 → breakouts
 7. Motor draden TB6612 AO1/AO2/BO1/BO2 → motoren
-8. Encoder draden → GPIO 14/25/26/27 (A/B per motor)
+8. Encoder draden → 1k/2k deler → GPIO 14/26 (A) + 25/27 (B)
 9. Visuele inspectie + multimeter check
 10. Eerste power-on: USB only (geen bat), check rails
 
@@ -121,7 +124,8 @@ TROUBLESHOOTING QUICK
 ═════════════════════════════════════════════════════════════════════════
 Geen WiFi AP      → Buck 5V checken, ESP32 3.3V checken
 Motor draait niet → STBY HIGH? PWM >0? VM spanning?
-Encoder 0         → INPUT_PULLUP? Juiste GPIO (14/26 voor snelheid)?
+Encoder 0         → INPUT_PULLUP? 1k/2k deler? GPIO 14/26 (kanaal A)?
+                    10 wielomwentelingen met de hand = 28.800 ticks
 MPU6050 niet      → Wire1 (16/17)? I²C scanner draaien?
 US meet niet      → Echo spanningsdeler? Trig puls 10µs?
 Bat 0V            → Divider 21:1? GPIO 33 (ADC1)?
@@ -135,5 +139,6 @@ VEILIGHEID
 ☐ Spanningsdelers HC-SR04 Echo GEEN 5V op ESP32!
 ☐ Noodstop knop (GPIO 3) getest
 ☐ Batterij < 6.6V = hard stop in firmware
+☐ MOTOR_MAX_DUTY op 716 (70%) laten staan - motoren zijn 3-6V
 ☐ Alle GND verbonden voordat voeding aan
 ════════════════════════════════════════════════════════════════════════

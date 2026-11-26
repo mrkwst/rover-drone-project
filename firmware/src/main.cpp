@@ -38,7 +38,7 @@ MPU6050 mpu(MPU6050_DEFAULT_ADDRESS, &Wire1);  // Use Wire1 (GPIO 16/17)
 
 // ==================== MOTOR CONTROL ====================
 struct MotorState {
-  int pwm_L = 0;      // -1023..1023
+  int pwm_L = 0;      // -MOTOR_MAX_DUTY..MOTOR_MAX_DUTY (716)
   int pwm_R = 0;
   bool enabled = false;
   uint32_t last_cmd_ms = 0;
@@ -53,10 +53,14 @@ float speed_L = 0.0;  // mm/s
 float speed_R = 0.0;
 
 // PID for speed control
+// LET OP: PID_v1 is NIET dt-bewust - de I- en D-term werken per sample.
+// Deze gains horen dus bij de 100 Hz cadans van update_pid_speed()
+// (PID_SAMPLE_MS = 10). Startwaarden, nog niet op hardware getuned (Sprint 3).
+// Te hoge Ki = motor schiet bij de eerste fout direct naar vol vermogen.
 double pid_setpoint_L = 0, pid_input_L = 0, pid_output_L = 0;
 double pid_setpoint_R = 0, pid_input_R = 0, pid_output_R = 0;
-PID pid_L(&pid_input_L, &pid_output_L, &pid_setpoint_L, 1.0, 0.5, 0.1, DIRECT);
-PID pid_R(&pid_input_R, &pid_output_R, &pid_setpoint_R, 1.0, 0.5, 0.1, DIRECT);
+PID pid_L(&pid_input_L, &pid_output_L, &pid_setpoint_L, 1.0, 0.08, 0.05, DIRECT);
+PID pid_R(&pid_input_R, &pid_output_R, &pid_setpoint_R, 1.0, 0.08, 0.05, DIRECT);
 
 // ==================== SENSORS ====================
 struct SensorData {
@@ -102,18 +106,19 @@ uint32_t last_cmd_ms = 0;
 const uint32_t CMD_TIMEOUT_MS = 500;  // Noodstop na 500ms geen commando
 
 // ==================== ENCODER ISRs ====================
-// Alleen kanaal A gebruiken voor snelheid (geen double-count op A+B)
-// Kanaal B kan voor richting worden gebruikt maar niet nodig voor snelheid
-// millis() NIET in ISR gebruiken - alleen teller ophogen
-void IRAM_ATTR enc_isr_LA() { enc_count_L++; }
+// Alleen kanaal A gebruiken voor snelheid (geen double-count op A+B).
+// CHANGE-interrupt: zowel opgaande als neergaande flank -> 2x resolutie.
+// Kanaal B kan voor richting worden gebruikt maar is niet nodig voor snelheid.
+// millis()/micros() NIET in ISR gebruiken - alleen teller ophogen.
+void IRAM_ATTR enc_isr_LA() { enc_count_L = enc_count_L + 1; }
 void IRAM_ATTR enc_isr_LB() { /* Richting detectie - niet gebruikt voor snelheid */ }
-void IRAM_ATTR enc_isr_RA() { enc_count_R++; }
+void IRAM_ATTR enc_isr_RA() { enc_count_R = enc_count_R + 1; }
 void IRAM_ATTR enc_isr_RB() { /* Richting detectie - niet gebruikt voor snelheid */ }
 
 // ==================== MOTOR HELPERS ====================
 void motor_set_pwm(int pwm_L, int pwm_R) {
-  pwm_L = constrain(pwm_L, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
-  pwm_R = constrain(pwm_R, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
+  pwm_L = constrain(pwm_L, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
+  pwm_R = constrain(pwm_R, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
   
   // Linker motor
   if (pwm_L >= 0) {
@@ -148,38 +153,37 @@ void motor_drive(int throttle, int steer) {
   int left = throttle + steer;
   int right = throttle - steer;
   
-  // Schaal naar PWM range
-  left = map(constrain(left, -200, 200), -200, 200, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
-  right = map(constrain(right, -200, 200), -200, 200, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
+  // Schaal naar PWM range (max MOTOR_MAX_DUTY = 70%, zie pinout.h)
+  left = map(constrain(left, -200, 200), -200, 200, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
+  right = map(constrain(right, -200, 200), -200, 200, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
   
   motor_set_pwm(left, right);
 }
 
-// PID speed control: converteer throttle naar snelheid setpoints
+// PID speed control: converteer throttle + steer naar snelheid setpoints
 void motor_drive_pid(int throttle, int steer) {
-  // Converteer throttle (-100..100) naar snelheid setpoint (mm/s)
-  // Max snelheid schatting: wiel omtrek * max RPM
-  // 66mm * PI * (max motor RPM / 48) - schatting ~500mm/s max
-  const float MAX_SPEED_MM_S = 500.0;
-  
-  float speed_setpoint = (throttle / 100.0) * MAX_SPEED_MM_S;
-  float steer_factor = steer / 100.0;  // -1.0 .. 1.0
-  
-  pid_setpoint_L = speed_setpoint * (1.0 + steer_factor);
-  pid_setpoint_R = speed_setpoint * (1.0 - steer_factor);
-  
-  // PID output wordt in update_pid_speed() berekend en direct toegepast
-  // via motor_set_pwm() met PID correctie
-  apply_pid_output();
+  // Converteer throttle (-100..100) naar snelheid setpoint (mm/s).
+  // 350 mm/s is haalbaar met de 70% duty-clamp (volle accu ~550 mm/s).
+  // Hoger zetten laat de I-term tegen de begrenzing aanlopen (windup).
+  const float MAX_SPEED_MM_S = 350.0;
+  const float MAX_TURN_MM_S  = 200.0;  // differentieel bij volledige stuuruitslag
+
+  float base = (throttle / 100.0) * MAX_SPEED_MM_S;
+  float turn = (steer / 100.0) * MAX_TURN_MM_S;
+
+  // Additief (niet multiplicatief): T=0 + S=100 moet op de plaats draaien
+  pid_setpoint_L = constrain(base + turn, -MAX_SPEED_MM_S, MAX_SPEED_MM_S);
+  pid_setpoint_R = constrain(base - turn, -MAX_SPEED_MM_S, MAX_SPEED_MM_S);
+
+  // De PID rekent op 100 Hz in update_pid_speed() en zet daar de motoren;
+  // hier alleen de setpoints aanpassen.
 }
 
 // Pas PID output toe op motoren
 void apply_pid_output() {
-  // pid_output is PWM correctie (-1023..1023)
-  // We voegen dit toe aan een basis PWM of gebruiken het direct
-  // Voor nu: PID output IS de motor PWM (snelheidsregeling)
-  int pwm_L = constrain((int)pid_output_L, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
-  int pwm_R = constrain((int)pid_output_R, -MOTOR_PWM_MAX, MOTOR_PWM_MAX);
+  // pid_output is al begrensd via SetOutputLimits(-MOTOR_MAX_DUTY, +MOTOR_MAX_DUTY)
+  int pwm_L = constrain((int)pid_output_L, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
+  int pwm_R = constrain((int)pid_output_R, -MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
   
   motor_set_pwm(pwm_L, pwm_R);
 }
@@ -267,28 +271,43 @@ void read_mpu6050() {
 }
 
 // ==================== PID SPEED CONTROL ====================
+// Snelheid wordt gemeten over een venster van PID_SAMPLE_MS (10 ms).
+// Bij 1 kHz was één tick al ~26% fout (3.8 ticks per ms bij volle snelheid);
+// over 10 ms zijn het ~38 ticks (~2.6%). De PID rekent daarom op 100 Hz.
 void update_pid_speed() {
-  // Bereken snelheid uit encoder pulsen per loop interval
-  // Pulses per mm = (ENCODER_PPR * GEAR_RATIO) / WHEEL_CIRCUMFERENCE_MM
-  const float pulses_per_mm = (ENCODER_PPR * GEAR_RATIO) / WHEEL_CIRCUMFERENCE_MM;
-  const float dt = 0.001;  // 1kHz loop = 1ms
-  
   static long last_enc_L = 0, last_enc_R = 0;
-  long delta_L = enc_count_L - last_enc_L;
-  long delta_R = enc_count_R - last_enc_R;
-  last_enc_L = enc_count_L;
-  last_enc_R = enc_count_R;
-  
-  speed_L = (delta_L / pulses_per_mm) / dt;  // mm/s
-  speed_R = (delta_R / pulses_per_mm) / dt;
-  
+  static uint32_t last_sample_us = 0;
+
+  uint32_t now_us = micros();
+  uint32_t elapsed_us = now_us - last_sample_us;
+  if (elapsed_us < (uint32_t)PID_SAMPLE_MS * 1000UL) return;
+
+  // Atomair uitlezen: de ISR kan de teller tussen twee reads ophogen
+  noInterrupts();
+  long enc_L = enc_count_L;
+  long enc_R = enc_count_R;
+  interrupts();
+
+  long delta_L = enc_L - last_enc_L;
+  long delta_R = enc_R - last_enc_R;
+  last_enc_L = enc_L;
+  last_enc_R = enc_R;
+
+  // Echte verstreken tijd - geen aanname dat de loop exact 1 ms duurt
+  float dt = elapsed_us / 1000000.0;
+  last_sample_us = now_us;
+
+  // Ticks -> mm/s (TICKS_PER_MM uit pinout.h: 13.10 ticks/mm)
+  speed_L = (delta_L / TICKS_PER_MM) / dt;
+  speed_R = (delta_R / TICKS_PER_MM) / dt;
+
   // PID input = gemeten snelheid, setpoint = gewenste snelheid
   pid_input_L = speed_L;
   pid_input_R = speed_R;
-  
+
   pid_L.Compute();
   pid_R.Compute();
-  
+
   // PID output direct toepassen op motoren (alleen in auto mode)
   if (cmd.mode == 1) {
     apply_pid_output();
@@ -328,11 +347,11 @@ void ws_on_event(AsyncWebSocket *server, AsyncWebSocketClient *client,
   switch (type) {
     case WS_EVT_CONNECT:
       ws_connected = true;
-      Serial.printf("WS Client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      Serial.printf("WS Client #%lu connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       break;
     case WS_EVT_DISCONNECT:
       ws_connected = false;
-      Serial.printf("WS Client #%u disconnected\n", client->id());
+      Serial.printf("WS Client #%lu disconnected\n", client->id());
       // Safety: emergency stop on disconnect
       motor_enable(false);
       emergency_stop = true;
@@ -441,7 +460,7 @@ void core0_task(void *pvParameters) {
       sensors.bat_voltage = read_battery_voltage();
     }
     
-    // 2. PID speed control (1kHz)
+    // 2. PID speed control (100Hz - update_pid_speed klokt zichzelf op 10ms)
     update_pid_speed();
     
     // 3. Safety check (1kHz)
@@ -491,8 +510,9 @@ void setup() {
   pinMode(PIN_ENC_LB, INPUT_PULLUP);  // Voor richting (niet gebruikt voor snelheid)
   pinMode(PIN_ENC_RA, INPUT_PULLUP);
   pinMode(PIN_ENC_RB, INPUT_PULLUP);  // Voor richting (niet gebruikt voor snelheid)
-  attachInterrupt(PIN_ENC_LA, enc_isr_LA, RISING);
-  attachInterrupt(PIN_ENC_RA, enc_isr_RA, RISING);
+  // CHANGE = beide flanken -> 2x resolutie (ENCODER_EDGES = 2)
+  attachInterrupt(PIN_ENC_LA, enc_isr_LA, CHANGE);
+  attachInterrupt(PIN_ENC_RA, enc_isr_RA, CHANGE);
   // Kanaal B interrupts niet aangesloten voor snelheid (voorkomt double-count)
   
   // Ultrasonic
@@ -541,13 +561,16 @@ void setup() {
   }
   
   // PID setup
+  // SetSampleTime(0): PID_v1 mag bij elke aanroep rekenen - wij klokken
+  // zelf op PID_SAMPLE_MS (10 ms) in update_pid_speed(). Zo geen last van
+  // millis()-jitter die anders samples zou overslaan.
   pid_L.SetMode(AUTOMATIC);
-  pid_L.SetOutputLimits(-MOTOR_PWM_MAX, MOTOR_PWM_MAX);
-  pid_L.SetSampleTime(1);  // 1ms
-  
+  pid_L.SetOutputLimits(-MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
+  pid_L.SetSampleTime(0);
+
   pid_R.SetMode(AUTOMATIC);
-  pid_R.SetOutputLimits(-MOTOR_PWM_MAX, MOTOR_PWM_MAX);
-  pid_R.SetSampleTime(1);
+  pid_R.SetOutputLimits(-MOTOR_MAX_DUTY, MOTOR_MAX_DUTY);
+  pid_R.SetSampleTime(0);
   
   // ==================== WIFI AP ====================
   WiFi.mode(WIFI_AP);

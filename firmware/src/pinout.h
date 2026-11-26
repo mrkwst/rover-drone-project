@@ -25,9 +25,14 @@
 // PWM instellingen
 #define MOTOR_PWM_FREQ      20000   // 20 kHz (inaudible, efficiënt voor TB6612FNG)
 #define MOTOR_PWM_RES       10      // 10-bit resolutie (0-1023)
-#define MOTOR_PWM_MAX       1023    // Max duty cycle
+#define MOTOR_PWM_MAX       1023    // Volledige PWM-schaal (10-bit)
 
-// ==================== ENCODERS (TT Motor met encoder disc) ====================
+// MOTOR_MAX_DUTY begrenst de duty cycle. De TB6612FNG geeft de accu-spanning
+// 1:1 door aan de motoren, en de Romi-motoren zijn 3-6V (2S vol = 8.4V).
+// 716/1023 = 70% -> max 5.9V bij volle accu. Zie docs/wiring.md.
+#define MOTOR_MAX_DUTY      716
+
+// ==================== ENCODERS (Pololu magnetisch, 12 CPR) ====================
 // Encoder A en B per motor (quadrature)
 // Gebruik GPIO met interrupt capability
 // VERPLAATST naar vrije pinnen om ADC1 vrij te maken voor line sensors + battery
@@ -36,14 +41,20 @@
 #define PIN_ENC_RA          26   // Encoder Rechter A (GPIO26 - free, interrupt OK, ADC2 but digital)
 #define PIN_ENC_RB          27   // Encoder Rechter B (GPIO27 - free, interrupt OK, ADC2 but digital)
 
-// Encoder specificaties (TT motor 1:48 + encoder disc)
-// Pulses per revolution (PPR) van encoder disc: typisch 10-20
-// Gear ratio: 1:48
-// Wheel diameter: 66mm
-#define ENCODER_PPR         20      // Pulses per motor revolution (encoder disc)
-#define GEAR_RATIO          48.0    // Gearbox ratio
-#define WHEEL_DIAMETER_MM   66.0    // Wiel diameter in mm
+// Encoder specificaties (Pololu Romi 120:1 + magnetische encoder)
+// 12 CPR = pulsen per motoromwenteling (vóór de gearbox)
+// Beide flanken van kanaal A worden geteld (CHANGE-interrupt) -> x2
+// Gear ratio: 1:120
+// Wheel diameter: 70mm (meegeleverd bij de Romi Chassis Kit)
+#define ENCODER_PPR         12      // Pulsen per motoromwenteling (magnetische encoder)
+#define ENCODER_EDGES       2       // CHANGE-interrupt telt opgaande + neergaande flank
+#define GEAR_RATIO          120.0   // Gearbox ratio
+#define WHEEL_DIAMETER_MM   70.0    // Wiel diameter in mm
 #define WHEEL_CIRCUMFERENCE_MM (WHEEL_DIAMETER_MM * 3.14159265359)
+
+// 12 x 2 x 120 = 2880 ticks per wielomwenteling -> 2880 / 219.9mm = 13.10 ticks/mm
+#define TICKS_PER_WHEEL_REV (ENCODER_PPR * ENCODER_EDGES * GEAR_RATIO)
+#define TICKS_PER_MM        (TICKS_PER_WHEEL_REV / WHEEL_CIRCUMFERENCE_MM)
 
 // Alleen kanaal A gebruiken voor snelheid (geen double-count op A+B)
 // Richting kan via kanaal B worden bepaald indien nodig
@@ -126,6 +137,7 @@
 // Loop frequenties
 #define LOOP_RATE_HZ        1000   // Core 0: 1kHz real-time loop
 #define SENSOR_RATE_HZ      100    // Sensor polling 100Hz
+#define PID_SAMPLE_MS       10     // Snelheidsvenster PID: 10ms = 100Hz
 #define TELEMETRY_RATE_HZ   50     // Telemetrie naar Pi 50Hz
 #define WS_HEARTBEAT_MS     1000   // WebSocket heartbeat
 

@@ -62,3 +62,7 @@ cad/*.stp
 *.pem
 .envget-platformio.py
 get-platformio.py
+.env
+
+# Presentaties (Marp) staan buiten de repo
+slides/
