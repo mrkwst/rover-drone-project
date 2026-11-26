@@ -1,6 +1,6 @@
 # Rover → Drone Project (Familie Project)
 
-**Status:** OTRONIC besteld · **Pololu Romi-aandrijflijn bestellen** · Firmware klaar
+**Status:** OTRONIC besteld · Romi-aandrijflijn besteld · Firmware klaar · **wacht op levering**
 
 ---
 
@@ -21,8 +21,8 @@
 | M3 200-set Standoff/Screw/Nut | OTRONIC | ✅ Besteld |
 | Mini sleutel M2.5/M3/M4 | OTRONIC | ✅ Besteld |
 | ~~2WD Chassis (DollaTek)~~ | ~~Amazon~~ | ↩️ **Retour** (encoderprintjes ontbraken) |
-| **Pololu Romi Chassis Kit - Black** | Opencircuit | 🛒 **Bestellen** |
-| **Pololu Magnetic Encoder Paar (12 CPR)** | Opencircuit | 🛒 **Bestellen** |
+| Pololu Romi Chassis Kit - Black | Opencircuit | ✅ Besteld |
+| Pololu Magnetic Encoder Paar (12 CPR) | Opencircuit | ✅ Besteld |
 
 **Totaal:** ~€132 bruto (~€112 netto na retour DollaTek)
 
