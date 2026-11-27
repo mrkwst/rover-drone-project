@@ -614,7 +614,8 @@ void setup() {
     "Core0_RT",      // Naam
     8192,            // Stack size (bytes)
     NULL,            // Parameters
-    24,              // Priority (hoge prioriteit voor real-time)
+    5,               // Prioriteit: ONDER die van de WiFi-taak (23). Stond op 24
+                     // en verdrong daardoor de WiFi-stack -> AP onzichtbaar.
     NULL,            // Task handle
     TASK_CORE_0      // Core 0
   );
