@@ -68,7 +68,7 @@ VOEDING
 ═════════════════════════════════════════════════════════════════════════
 2S 18650 (7.4V) ──▶ TB6612FNG VM (direct, max 70% duty = 5,9V)
               │
-              ├─▶ XL4015 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
+              ├─▶ XH957 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
               │                          │
               │                          ├─▶ TB6612FNG VCC (via 3.3V reg)
               │                          ├─▶ HC-SR04 VCC (5V)
@@ -78,6 +78,8 @@ VOEDING
               └─▶ Spanningsdeler (21:1) ──▶ GPIO 33 (ADC1)
 
 ALLE GND VERBINDEN (sterpuntsbreiding op perboard)!
+
+Buck XH957: EN LOS LATEN (= aan), GND gedeeld (in- en uitgangsmin = zelfde punt)
 
 ═════════════════════════════════════════════════════════════════════════
 TESTPUNTEN (na solderen, VOOR power-on)

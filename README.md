@@ -15,7 +15,7 @@
 | TCRT5000 1-ch Module (4x) | OTRONIC | ✅ Besteld |
 | 2×18650 Houder + Schakelaar | OTRONIC | ✅ Besteld |
 | Samsung 18650 3400mAh (2x) | OTRONIC | ✅ Besteld |
-| XL4015 Buck Converter | OTRONIC | ✅ Besteld |
+| Buck Converter (OTRONIC XH957) | OTRONIC | ✅ Besteld |
 | Mini Breadboard 170 | OTRONIC | ✅ Besteld |
 | 40-pin Headers (2x) | OTRONIC | ✅ Besteld |
 | M3 200-set Standoff/Screw/Nut | OTRONIC | ✅ Besteld |

@@ -70,7 +70,7 @@
               ┌────────────────┼────────────────┐
               ▼                ▼                ▼
        ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-       │  TB6612FNG  │ │ XL4015 Buck │ │ Spannings-  │
+       │  TB6612FNG  │ │ XH957 Buck  │ │ Spannings-  │
        │  VM (motor) │ │  Converter  │ │ deler (bat) │
        │  7.4V direct│ │  IN: 7.4V   │ │  210k/10k   │
        └──────┬──────┘ │  OUT: 5.0V  │ └──────┬──────┘
@@ -115,6 +115,38 @@ motor wordt heet.
 
 **Nette oplossing later:** een aparte 6 V-rail voor `VM` (buck of DC-DC),
 buiten het huidige budget.
+
+---
+
+## 🔌 Buck Converter — OTRONIC XH957 (`OT253-B47`)
+
+**Let op:** dit is *niet* de XL4015 die eerder in de docs stond — de XL4015 is een
+ander (5 A) bord. Ons bord is de kleine XH957, 20×11×5 mm.
+
+| | |
+|---|---|
+| Pinnen | `VO+` (uit +), `GND` (gedeelde min), `IN+` (in +), `EN` (enable) |
+| Ingang | 4,5–24 V |
+| Uitgang | 0,8–17 V via potmeter |
+| Stroom | 3 A max, **2,1 A continu** bij 5 V |
+
+### Aansluiten
+
+```
+2S houder +  ──[schakelaar]──► IN+
+2S houder −  ─────────────────► GND ──┬── common GND (ESP32, TB6612, sensoren)
+                                      │
+ESP32 5V-pin ◄──────────────── VO+    │
+                   EN  ── (LOS LATEN) │
+```
+
+- **`GND` is gedeeld** — ingangs- en uitgangsmin zijn hetzelfde knooppunt.
+- **`EN` los laten = aan.** Aan `GND` = uit. Meet je 0 V op `VO+`? Check eerst of `EN` niet aan `GND` hangt.
+- Soldeerpads, geen schroefklemmen — 4 draden solderen.
+- De achterkant heeft jumpers voor vaste spanningen (1,8 / 2,5 / 3,3 / 5 / 9 / 12 V). Standaard is `ADJ` gesoldeerd → variabel via potmeter. Doorsnijden is semi-permanent.
+
+> **Waarom 2,1 A genoeg is:** de buck voedt alleen ESP32 + sensoren (~250 mA).
+> De motoren hangen **direct aan de accu** via de TB6612, niet aan de buck.
 
 ---
 
