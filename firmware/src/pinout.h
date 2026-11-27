@@ -113,8 +113,10 @@
 #define BAT_LOW_WARNING     7.0    // Waarschuwing niveau
 #define BAT_CRITICAL        6.6    // Noodstop niveau
 
-// ==================== STATUS LED & BUZZER ====================
-#define PIN_STATUS_LED      2    // Onboard LED (GPIO2) - active HIGH
+// ==================== BUZZER ====================
+// LET OP: er is GEEN status-LED meer. GPIO2 was dubbel bezet (onboard LED én
+// US_REAR_TRIG). De achterste ultrasoon wint - de onboard LED op GPIO2 licht
+// nu alleen nog mee met de trig-pulsjes (onmerkbaar).
 #define PIN_BUZZER          32   // GPIO32 (free, PWM capable, geen boot conflict)
 
 // ==================== NOODSTOP ====================

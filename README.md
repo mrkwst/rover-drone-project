@@ -91,16 +91,18 @@ rover-drone/
 | Encoder RA (R-A) | 26 | Input, interrupt | Kanaal A voor snelheid, **via 1k/2k deler** |
 | Encoder RB (R-B) | 27 | Input, interrupt | Richting (niet gebruikt voor snelheid) |
 | US Front Trig/Echo | 13, 12 | Out/In | Echo: **1k/2k spanningsdeler!** |
-| US Rear Trig/Echo | 2, 15 | Out/In | Echo: **1k/2k spanningsdeler!** |
+| US Rear Trig/Echo | 2, 15 | Out/In | Echo: **1k/2k spanningsdeler!** Trig op GPIO2 |
 | MPU6050 SDA/SCL | 16, 17 | I2C (Wire1) | Niet Wire0 (conflict motor) |
 | Line L2 (linksbuiten) | 36 | ADC1_CH0 | Werkt met WiFi |
 | Line L1 (linksbinnen) | 39 | ADC1_CH3 | Werkt met WiFi |
 | Line R1 (rechtsbinnen) | 34 | ADC1_CH6 | Werkt met WiFi |
 | Line R2 (rechtsbuiten) | 35 | ADC1_CH7 | Werkt met WiFi |
 | Battery ADC | 33 | ADC1_CH5 | Werkt met WiFi, divider 21:1 |
-| Status LED | 2 | Output | Onboard |
 | Buzzer | 32 | Output, PWM | Geen boot conflict |
 | Emergency Stop | 3 | Input, pull-up | Active LOW, GPIO3 (RX0) |
+
+> **Status-LED vervallen:** GPIO2 was dubbel bezet (onboard LED én US Rear Trig).
+> De achterste ultrasoon wint. Zie `firmware/src/pinout.h`.
 
 ---
 

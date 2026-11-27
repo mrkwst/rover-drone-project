@@ -557,9 +557,7 @@ void setup() {
   // I2C voor MPU6050 (op alternatieve pinnen - Wire1)
   Wire1.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
   
-  // Status LED
-  pinMode(PIN_STATUS_LED, OUTPUT);
-  digitalWrite(PIN_STATUS_LED, LOW);
+  // Geen status-LED: GPIO2 is in gebruik als US_REAR_TRIG (zie pinout.h)
   
   // ==================== MPU6050 INIT ====================
   mpu.initialize();
@@ -586,8 +584,17 @@ void setup() {
   
   // ==================== WIFI AP ====================
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD, WIFI_AP_CHANNEL);
-  Serial.printf("AP Started: %s (IP: %s)\n", WIFI_AP_SSID, WiFi.softAPIP().toString().c_str());
+  delay(100);
+  bool ap_ok = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD, WIFI_AP_CHANNEL);
+  if (ap_ok) {
+    Serial.printf("AP Started: %s (IP: %s, kanaal: %d, MAC: %s)\n",
+                  WIFI_AP_SSID,
+                  WiFi.softAPIP().toString().c_str(),
+                  (int)WiFi.channel(),
+                  WiFi.softAPmacAddress().c_str());
+  } else {
+    Serial.println("!! AP START MISLUKT - softAP() gaf false !!");
+  }
   
   // ==================== WEBSOCKET SERVER ====================
   ws.onEvent(ws_on_event);
@@ -631,12 +638,7 @@ void loop() {
     ws.cleanupClients();
   }
   
-  // Heartbeat LED
-  static uint32_t led_ms = 0;
-  if (millis() - led_ms > 500) {
-    led_ms = millis();
-    digitalWrite(PIN_STATUS_LED, ws_connected ? HIGH : (millis() / 500) % 2);
-  }
+  // (Geen heartbeat-LED meer: GPIO2 is US_REAR_TRIG)
   
   // Yield voor WiFi stack
   vTaskDelay(pdMS_TO_TICKS(1));

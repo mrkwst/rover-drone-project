@@ -59,7 +59,7 @@ Line R2 (rechtsbuiten) → GPIO 35  ● ADC1   Meet op ADC1_CH5 (GPIO33)
 ═════════════════════════════════════════════════════════════════════════
 STATUS & CONTROL
 ═════════════════════════════════════════════════════════════════════════
-Status LED      → GPIO 2    ● (onboard, active HIGH)
+~~Status LED     → GPIO 2~~    ⚠ VERVALLEN (GPIO2 = US Rear Trig)
 Emergency Stop  → GPIO 3    ● (input pull-up, active LOW, was RX0)
 Buzzer          → GPIO 32   ● (PWM capable, geen boot conflict)
 

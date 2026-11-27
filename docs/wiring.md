@@ -46,7 +46,7 @@
 | **Battery Monitor** | | | | |
 | Bat Voltage | 2S 18650 via divider | **GPIO 33** | ADC1_CH5 | **ADC1 - werkt met WiFi!** |
 | **Status & Control** | | | | |
-| Status LED | Onboard | **GPIO 2** | Output | Active HIGH |
+| ~~Status LED~~ | ~~Onboard~~ | ~~GPIO 2~~ | — | **Vervallen**: GPIO2 = US Rear Trig |
 | Emergency Stop | Noodstop knop | **GPIO 3** | Input pull-up | Active LOW, was RX0 |
 | Buzzer | Piezo | **GPIO 32** | Output, PWM | Geen boot conflict |
 | **I²C (Wire0 - standaard)** | Vrij voor toekomst | **GPIO 21, 22** | | Wordt NIET gebruikt (conflict motor) |
