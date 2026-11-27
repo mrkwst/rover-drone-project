@@ -125,7 +125,9 @@
 // ==================== WIFI / WEBSOCKET ====================
 #define WIFI_AP_SSID        "Rover_AP"
 #define WIFI_AP_PASSWORD    "rover123"
-#define WIFI_AP_CHANNEL     1
+// Kanaal 6: kanaal 1 gaf op de testapparaten problemen met zichtbaarheid in de
+// Wi-Fi-lijst. 6 is bewezen werkend. Zie het projectplan §2F.
+#define WIFI_AP_CHANNEL     6
 #define WS_PORT             80
 #define WS_PATH             "/ws"
 
