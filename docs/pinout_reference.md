@@ -73,7 +73,7 @@ VOEDING
    houder2 - ──────────────┴── P-                     │
                                                       ▼
    ── TB6612FNG VM (direct, max 70% duty = 5,9V)
-   ── XH957 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
+   ── XL4015 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
                   │
                   ├─▶ TB6612FNG VCC (via 3.3V reg)
                   ├─▶ HC-SR04 VCC (5V)
@@ -83,7 +83,8 @@ VOEDING
 
 ALLE GND VERBINDEN (sterpuntsbreiding op perboard)!
 
-Buck XH957: EN LOS LATEN (= aan), GND gedeeld (in- en uitgangsmin = zelfde punt)
+Buck XL4015: schroefklemmen IN+/IN-/OUT+/OUT-, geen EN, min 1.25V
+              OUT- en IN- zijn beide GND (onderling verbonden)
 Accu: 2 losse houders in SERIE; BMS BM op middenpunt; laden in externe lader
       (cellen zijn onbeschermd - nooit kortsluiten of mixen)
 

@@ -18,7 +18,7 @@
 | 18650 single battery holder met contacten (2x) | OTRONIC | 🛒 **Bestellen** |
 | 2S BMS laad/beveiliging (`OT3681`) | OTRONIC | 🛒 **Bestellen** |
 | Lader 2× 18650 (`OT6229`) | OTRONIC | 🛒 **Bestellen** |
-| Buck Converter (OTRONIC XH957) | OTRONIC | ✅ Besteld |
+| Buck Converter — XL4015 (**vervangt defecte XH957**) | OTRONIC | 🛒 **Bestellen** |
 | Mini Breadboard 170 | OTRONIC | ✅ Besteld |
 | 40-pin Headers (2x) | OTRONIC | ✅ Besteld |
 | M3 200-set Standoff/Screw/Nut | OTRONIC | ✅ Besteld |
