@@ -324,19 +324,26 @@ void safety_check() {
   }
   
   // 2. Batterij laag
+  // Edge-triggered: safety_check loopt op 1 kHz - alleen loggen bij de overgang,
+  // anders overspoelt het de seriële poort.
   if (sensors.bat_voltage < BAT_CRITICAL) {
-    Serial.printf("SAFETY: Battery critical %.2fV - EMERGENCY STOP\n", sensors.bat_voltage);
+    if (!emergency_stop) {
+      Serial.printf("SAFETY: Battery critical %.2fV - EMERGENCY STOP\n", sensors.bat_voltage);
+    }
     motor_enable(false);
     emergency_stop = true;
   } else if (sensors.bat_voltage < BAT_LOW_WARNING) {
     // Alleen waarschuwing via telemetrie
   }
-  
-  // 3. Ultrasonic noodstop (te dichtbij)
-  if (sensors.dist_front > 0 && sensors.dist_front < 10) {
+
+  // 3. Ultrasonic noodstop (te dichtbij) - ook alleen bij de overgang loggen
+  static bool front_close = false;
+  bool front_close_now = (sensors.dist_front > 0 && sensors.dist_front < 10);
+  if (front_close_now && !front_close) {
     Serial.println("SAFETY: Front obstacle < 10cm");
     // Optioneel: motor_enable(false);
   }
+  front_close = front_close_now;
   
   // 4. Emergency stop pin wordt in core0_task gecheckt (1kHz)
 }
@@ -431,13 +438,18 @@ void send_telemetry() {
 void core0_task(void *pvParameters) {
   Serial.println("Core 0: Real-time loop started (1kHz)");
   
-  // Enable Task Watchdog Timer for this task (new ESP-IDF API)
+  // Task Watchdog voor deze taak.
+  // De Arduino-core initialiseert de TWDT al. esp_task_wdt_init() zou dan een
+  // fout loggen, dus eerst proberen te herconfigureren en alleen initialiseren
+  // als dat niet kan (TWDT nog niet actief).
   esp_task_wdt_config_t wdt_config = {
     .timeout_ms = 3000,
     .idle_core_mask = 0,
     .trigger_panic = true
   };
-  esp_task_wdt_init(&wdt_config);
+  if (esp_task_wdt_reconfigure(&wdt_config) == ESP_ERR_INVALID_STATE) {
+    esp_task_wdt_init(&wdt_config);
+  }
   esp_task_wdt_add(NULL);  // Add current task to watchdog
   
   const TickType_t interval = pdMS_TO_TICKS(1);  // 1ms = 1kHz
