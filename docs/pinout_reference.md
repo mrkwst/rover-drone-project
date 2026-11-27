@@ -66,20 +66,26 @@ Buzzer          → GPIO 32   ● (PWM capable, geen boot conflict)
 ═════════════════════════════════════════════════════════════════════════
 VOEDING
 ═════════════════════════════════════════════════════════════════════════
-2S 18650 (7.4V) ──▶ TB6612FNG VM (direct, max 70% duty = 5,9V)
-              │
-              ├─▶ XH957 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
-              │                          │
-              │                          ├─▶ TB6612FNG VCC (via 3.3V reg)
-              │                          ├─▶ HC-SR04 VCC (5V)
-              │                          ├─▶ Encoderprintjes VCC (5V)
-              │                          └─▶ Sensoren VCC
-              │
-              └─▶ Spanningsdeler (21:1) ──▶ GPIO 33 (ADC1)
+2S 18650 pack (⚠ ONBESCHERMD) ──▶ 2S BMS (OT3681) ──▶ schakelaar
+   houder1 + ──────────────┐                          │
+   houder1 - ──┐           │  BM = middenpunt         │
+   houder2 + ──┘           │                          │
+   houder2 - ──────────────┴── P-                     │
+                                                      ▼
+   ── TB6612FNG VM (direct, max 70% duty = 5,9V)
+   ── XH957 Buck IN ──▶ 5.0V OUT ──▶ ESP32 5V pin
+                  │
+                  ├─▶ TB6612FNG VCC (via 3.3V reg)
+                  ├─▶ HC-SR04 VCC (5V)
+                  ├─▶ Encoderprintjes VCC (5V)
+                  └─▶ Sensoren VCC
+   ── Spanningsdeler (21:1) ──▶ GPIO 33 (ADC1)
 
 ALLE GND VERBINDEN (sterpuntsbreiding op perboard)!
 
 Buck XH957: EN LOS LATEN (= aan), GND gedeeld (in- en uitgangsmin = zelfde punt)
+Accu: 2 losse houders in SERIE; BMS BM op middenpunt; laden in externe lader
+      (cellen zijn onbeschermd - nooit kortsluiten of mixen)
 
 ═════════════════════════════════════════════════════════════════════════
 TESTPUNTEN (na solderen, VOOR power-on)
@@ -94,6 +100,8 @@ TESTPUNTEN (na solderen, VOOR power-on)
 ☐ Bat divider uitgang < 0.5V bij 8.4V bat (op GPIO 33)
 ☐ Alle GND = 0Ω onderling
 ☐ Geen kortsluiting VCC-GND
+☐ Accu pack na BMS = 6,0-8,4V (op P+ / P-)
+☐ Geen kortsluiting op P+ / P- (∞ Ω)
 
 ═════════════════════════════════════════════════════════════════════════
 SOLDER VOLGORDE
@@ -136,7 +144,12 @@ Noodstop werkt niet → GPIO 3 (pull-up, active LOW)?
 ═════════════════════════════════════════════════════════════════════════
 VEILIGHEID
 ═════════════════════════════════════════════════════════════════════════
-☐ Alleen beschermde 18650 cellen (flat top)
+⚠ Cellen zijn ONBESCHERMD (INR18650-35E, 8A) - 2S BMS verplicht!
+☐ 2 losse houders in SERIE (niet de dubbele/parallelle houder)
+☐ BMS BM-pin exact op het middenpunt tussen de cellen
+☐ Nooit direct aan een 18650 solderen
+☐ Laden in de EXTERNE lader, cellen buiten de rover
+☐ Beide cellen altijd samen, zelfde lading
 ☐ Buck converter EERST op 5.0V instellen (met multimeter)
 ☐ Spanningsdelers HC-SR04 Echo GEEN 5V op ESP32!
 ☐ Noodstop knop (GPIO 3) getest

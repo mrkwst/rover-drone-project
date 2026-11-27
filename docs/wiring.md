@@ -56,39 +56,45 @@
 ## ⚡ Voedingschema
 
 ```
-                    ┌─────────────────────┐
-                    │   2x 18650 (2S)     │
-                    │   7.4V nominal      │
-                    │   8.4V max          │
-                    └──────────┬──────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │ 2S Battery Holder   │
-                    │   met schakelaar    │
-                    └──────────┬──────────┘
-                               │
-              ┌────────────────┼────────────────┐
-              ▼                ▼                ▼
-       ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-       │  TB6612FNG  │ │ XH957 Buck  │ │ Spannings-  │
-       │  VM (motor) │ │  Converter  │ │ deler (bat) │
-       │  7.4V direct│ │  IN: 7.4V   │ │  210k/10k   │
-       └──────┬──────┘ │  OUT: 5.0V  │ └──────┬──────┘
-              │        └──────┬──────┘        │
-              ▼               ▼               ▼
-       ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-       │ 2x Romi     │ │  ESP32      │ │  ESP32 ADC  │
-       │ 120:1 motor │ │  5V pin     │ │  GPIO33     │
-       │ (via TB6612)│ │             │ │             │
-       └─────────────┘ └─────────────┘ └─────────────┘
-              │               │               │
-              └───────────────┼───────────────┘
-                              ▼
-                       ┌─────────────┐
-                       │   GND COMMON │
-                       │  (alle massa's│
-                       │   verbonden)  │
-                       └─────────────┘
+                    ┌─────────────────────────┐
+                    │   2x 18650 (2S)         │
+                    │   INR18650-35E          │
+                    │   7.4V nominal 8.4V max │
+                    │   ⚠ ONBESCHERMD (8A)    │
+                    └───────────┬─────────────┘
+                                │
+                    ┌───────────▼─────────────┐
+                    │   2S BMS (OT3681)       │
+                    │   over-ontladen /       │
+                    │   overladen / kortsluit │
+                    └───────────┬─────────────┘
+                                │
+                    ┌───────────▼─────────────┐
+                    │   schakelaar            │
+                    └───────────┬─────────────┘
+                                │
+              ┌─────────────────┼─────────────────┐
+              ▼                 ▼                 ▼
+       ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+       │  TB6612FNG  │   │ XH957 Buck  │   │ Spannings-  │
+       │  VM (motor) │   │  Converter  │   │ deler (bat) │
+       │  ~7.4V      │   │  IN: ~7.4V  │   │  210k/10k   │
+       └──────┬──────┘   │  OUT: 5.0V  │   └──────┬──────┘
+              │          └──────┬──────┘          │
+              ▼                 ▼                 ▼
+       ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+       │ 2x Romi     │   │  ESP32      │   │  ESP32 ADC  │
+       │ 120:1 motor │   │  5V pin     │   │  GPIO33     │
+       │ (via TB6612)│   │             │   │             │
+       └─────────────┘   └─────────────┘   └─────────────┘
+              │                 │                 │
+              └─────────────────┼─────────────────┘
+                                ▼
+                         ┌─────────────┐
+                         │  GND COMMON │
+                         │ (alle massa's│
+                         │   verbonden) │
+                         └─────────────┘
 ```
 
 ---
@@ -200,6 +206,58 @@ Doe dit voor BEIDE sensoren:
 
 ---
 
+## 🔋 Accu, BMS en laden — **de cellen zijn ONBESCHERMD**
+
+> ⚠️ **Dit is de gevaarlijkste sectie van het project. Lees hem helemaal.**
+
+De bestelde cellen zijn **Samsung INR18650-35E** (art. `OT8081`): 3400 mAh, 8 A
+continue ontlading, flat top, **`Protected: No`**. Er zit dus géén
+beschermingsprintje in de cel.
+
+| Bescherming | Aanwezig |
+|---|---|
+| Over-ontlading | ❌ (firmware-grens 6,6 V is de enige actieve rem) |
+| Over-laden | ❌ |
+| Kortsluiting | ❌ — de cel levert **8 A**, een kortsluiting wordt heet en snel gevaarlijk |
+
+### Wat er daarom tussen moet: 2S BMS (`OT3681`, €2,00)
+
+Het 2S BMS-bordje (17,5 × 17,5 mm) beveiligt tegen over-ontladen, overladen en
+kortsluiting. Ondanks de naam gebruiken **wij hem alleen als beveiliging**, niet
+om te laden.
+
+```
+   Houder 1: [+] ●────────────────● P+ ──[ schakelaar ]──► de rest van de rover
+             [-] ●──┐
+                  │  ← serie
+   Houder 2: [+] ●──┘            ┌─ BM  (middenaftakking — verplicht!)
+             [-] ●────────────────● P− ────────────────────► GND
+```
+
+- **`BM` moet exact tussen de twee cellen.** Dat is het balanceerpunt. Verkeerd
+  aangesloten = de BMS werkt niet of wordt beschadigd.
+- Gebruik **twee losse 18650-houders met contacten**, niet de dubbele houder:
+  die zet de cellen meestal **parallel** (3,7 V) en dan klopt de hele rover niet meer.
+- **Nooit direct aan een 18650 solderen.** Hitte beschadigt de cel. Gebruik houdercontacten.
+
+### Laden: externe lader, niet via de BMS
+
+Gebruik de **lader voor 2× 18650 (`OT6229`, €15,00)**: stop beide cellen erin, klaar.
+Overlaad- en kortsluitbeveiliging zit erin, en hij werkt met flat-top.
+
+- Laad de cellen **buiten de rover**, in de lader.
+- **Beide cellen altijd samen**, zelfde lading, zelfde paar. Nooit mixen.
+- De BMS wordt dus niet gebruikt om te laden; hij is de beveiliging tijdens het rijden.
+- Het bordje accepteert ook laden op 8,4–9 V, maar daar is een aparte 9 V-bron voor nodig — niet nodig met de externe lader.
+
+### De firmware-grens
+
+De firmware stopt bij **6,6 V** (3,3 V/cel). Dat is *hoger* dan waar de BMS ingrijpt
+(~2,5–3,0 V/cel), dus de firmware is de eerste rem. Dat is bewust: de BMS is het
+achtervangnet als de code zou vastlopen terwijl de motoren nog draaien.
+
+---
+
 ## 🔋 Batterij Spanningsdeler
 
 ```
@@ -219,7 +277,14 @@ Vout_max = 8.4V / 21 = 0.4V ✓ Veilig voor ESP32 ADC (0-3.3V)
 
 Meet op GPIO 33 (ADC1_CH5, input only)
 ✅ ADC1 - werkt NORMAAL met actieve WiFi, geen workaround nodig!
+
+De deler tikt af op de pack-spanning (ná de BMS, vóór de schakelaar of erna — kies
+na de schakelaar, dan leest hij 0V als de rover uit staat).
 ```
+
+> De 100k/100k/10k-keten is hoogohmig (~40 µA). Prima voor een indicatie, maar
+> verwacht geen laboratoriumnauwkeurigheid — de ESP32-ADC is ruisig. Kalibreren
+> met een multimeter is sprint 2-werk.
 
 ---
 
@@ -317,6 +382,8 @@ Let op: Geen magnetometer → yaw drift!
 
 | Test | Verwacht | Werkwijze |
 |------|----------|-----------|
+| **Accu-pack na BMS** | **6,0–8,4V** | Multimeter op `P+` vs `P−`, schakelaar aan |
+| **Accu-draden geen sluiting** | ∞ Ω | Continuïteit `P+`–`P−` **vóór** aansluiten |
 | Buck converter OUT | 5.0V ±0.05V | Multimeter op buck OUT vs GND |
 | ESP32 5V pin | 5.0V | Multimeter op ESP32 5V pin |
 | ESP32 3.3V pin | 3.3V | Multimeter op ESP32 3.3V pin |
@@ -334,15 +401,16 @@ Let op: Geen magnetometer → yaw drift!
 ## 📝 Soldervolgorde
 
 1. **Headers op breakouts** (TB6612FNG, MPU6050, 4x TCRT5000, HC-SR04)
-2. **Spanningsdelers** op perboard/breadboard (1k/2k voor US, 100k/100k/10k voor bat)
-3. **Hoofdvoeding**: 2S houder → buck IN, 2S houder → TB6612 VM
-4. **Buck OUT** → ESP32 5V pin, TB6612 VCC (via 3.3V reg), sensoren VCC
-5. **Alle GND** samen (sterpuntsbreiding op perboard)
-6. **Signaal draden** ESP32 → breakouts (check pinout tabel!)
-7. **Motor draden** TB6612 AO1/AO2/BO1/BO2 → motoren (Romi: direct op de motorpennen)
-8. **Encoder draden** encoderprintje A/B → 1k/2k deler → ESP32 GPIO 14/26 (A) en 25/27 (B)
-9. **Visuele inspectie** + multimeter check
-10. **Eerste power-on** met USB (geen batterij), check 3.3V/5V rails
+2. **Spanningsdelers** op perboard/breadboard (1k/2k voor US + encoders, 100k/100k/10k voor bat)
+3. **Accu-pack bouwen**: 2 losse houders in **serie**, `BM` van de **2S BMS** op het middenpunt, dan `P+`/`P−` eruit
+4. **Hoofdvoeding**: `P+` (via schakelaar) → buck IN+ **en** → TB6612 VM; `P−` → GND
+5. **Buck OUT** → ESP32 5V pin, TB6612 VCC (via 3.3V reg), sensoren VCC
+6. **Alle GND** samen (sterpuntsbreiding op perboard)
+7. **Signaal draden** ESP32 → breakouts (check pinout tabel!)
+8. **Motor draden** TB6612 AO1/AO2/BO1/BO2 → motoren (Romi: direct op de motorpennen)
+9. **Encoder draden** encoderprintje A/B → 1k/2k deler → ESP32 GPIO 14/26 (A) en 25/27 (B)
+10. **Visuele inspectie** + multimeter check (incl. geen sluiting op `P+`–`P−`)
+11. **Eerste power-on** met USB (geen batterij), check 3.3V/5V rails
 
 ---
 
@@ -362,3 +430,7 @@ Let op: Geen magnetometer → yaw drift!
 12. **Extended backshaft**: het Romi-motorasje moet aan de achterkant uitsteken, anders past de encodermagneet niet. Direct bij uitpakken controleren.
 13. **Romi bodemvrijheid ≈ 10 mm**: de TCRT5000's moeten **onder** de bodemplaat, 3-5 mm boven de grond. Niet op het dek monteren.
 14. **HC-SR04 voor**: zit geen bracket op de Romi - voorzie een randje aan het zelfgemaakte dek of print er een.
+15. **⚠️ Cellen zijn ONBESCHERMD** (INR18650-35E, `Protected: No`): 8 A kortsluitstroom. Nooit kortsluiten, nooit verkeerd om, nooit mixen met een andere cel. Zie de sectie "Accu, BMS en laden".
+16. **⚠️ 2S BMS `BM`-pin** moet exact op het middenpunt tussen de twee cellen. Verkeerd aangesloten = geen bescherming of beschadigd bordje.
+17. **⚠️ Nooit aan een 18650 solderen** — hitte beschadigt de cel. Gebruik houdercontacten.
+18. **⚠️ Laden gebeurt in de externe lader**, cellen buiten de rover. Niet via de BMS laden zonder 9 V-bron.

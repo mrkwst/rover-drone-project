@@ -13,8 +13,11 @@
 | HC-SR04 Ultrasonic (2x) | OTRONIC | ✅ Besteld |
 | MPU-6050 IMU | OTRONIC | ✅ Besteld |
 | TCRT5000 1-ch Module (4x) | OTRONIC | ✅ Besteld |
-| 2×18650 Houder + Schakelaar | OTRONIC | ✅ Besteld |
-| Samsung 18650 3400mAh (2x) | OTRONIC | ✅ Besteld |
+| Samsung INR18650-35E 3400mAh, 8A (**onbeschermd**) (2x) | OTRONIC | ✅ Besteld |
+| 2×18650 plastic bracket (blijkt **zonder contacten**) | OTRONIC | ⚠️ Onbruikbaar |
+| 18650 single battery holder met contacten (2x) | OTRONIC | 🛒 **Bestellen** |
+| 2S BMS laad/beveiliging (`OT3681`) | OTRONIC | 🛒 **Bestellen** |
+| Lader 2× 18650 (`OT6229`) | OTRONIC | 🛒 **Bestellen** |
 | Buck Converter (OTRONIC XH957) | OTRONIC | ✅ Besteld |
 | Mini Breadboard 170 | OTRONIC | ✅ Besteld |
 | 40-pin Headers (2x) | OTRONIC | ✅ Besteld |
@@ -24,7 +27,8 @@
 | Pololu Romi Chassis Kit - Black | Opencircuit | ✅ Besteld |
 | Pololu Magnetic Encoder Paar (12 CPR) | Opencircuit | ✅ Besteld |
 
-**Totaal:** ~€132 bruto (~€112 netto na retour DollaTek)
+**Totaal besteld:** ~€132 bruto (~€112 netto na retour DollaTek)  
+**Nog te bestellen (accu-aanvulling):** ~€23 (houders + BMS + lader + verzending)
 
 ---
 
