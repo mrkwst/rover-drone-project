@@ -201,6 +201,8 @@ rover-drone/
 | Encoder telt half/onregelmatig | Magneet niet goed op de as, luchtspleet te groot | Magneet opnieuw persen, printje dichter bij de as |
 | Snelheid/topsnelheid te laag | `MOTOR_MAX_DUTY` of lege accu | 70% clamp is bewust; accu laden of 6V-rail overwegen |
 | MPU6050 niet gevonden | I²C adres, verkeerde Wire | `Wire1.begin(16,17)`, I2C scanner draaien |
+| Yaw loopt weg bij stilstand | Ongekalibreerde **gyro-offset** (~−8,7 °/s op deze module) | Kalibreren — zie `docs/wiring.md` → MPU6050 kalibratie |
+| Roll/pitch staan er een paar graden naast | **Accel-offsets** (vectorlengte 0,85 g i.p.v. 1,00 g) | Idem — accel-offsets bepalen |
 | HC-SR04 meet niet | Echo pin 5V op ESP32 | **Spanningsdeler 1k/2k!** |
 | Bat 0V | Divider 21:1? GPIO 33 (ADC1) | Check spanningsdeler, ADC pin 33 |
 | WiFi instabiel / disconnect | ADC2 lezing tijdens WiFi | **Opgelost:** alle sensors nu op ADC1 |

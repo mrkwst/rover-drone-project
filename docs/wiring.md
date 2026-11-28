@@ -396,6 +396,28 @@ Montage: Plat op chassis, chip naar boven.
 Let op: Geen magnetometer → yaw drift!
 ```
 
+### ⚠️ Kalibratie nodig — deze module heeft offsets (gemeten 2026-11-28)
+
+| Meting (stilstand) | Waarde | Hoort |
+|---|---|---|
+| Accel plat (Z naar beneden) | `0.08, -0.01, 0.85` → lengte **0,85 g** | 1,00 g |
+| Accel verticaal (X naar beneden) | `1.06, -0.01, -0.25` → lengte **1,09 g** | 1,00 g |
+| Gyro Z | **−8,7 °/s** (constant) | ~0 °/s |
+
+De vectorlengte van de zwaartekracht hoort altijd **1,00 g** te zijn. Het verschil tussen
+de assen (0,85 vs 1,09) betekent **per-as offsets**. En de gyro heeft een constante
+offset van ~8,7 °/s op Z.
+
+**Gevolgen zonder correctie:**
+- roll/pitch staan er een paar graden naast (accel-offsets)
+- **yaw loopt weg** — zichtbaar in de telemetrie: `y` blijft oplopen terwijl het bord stil ligt
+
+**Aanpak (sprint 2):**
+1. **Gyro-offset**: bij stilstand N metingen middelen → offset opslaan → van elke meting aftrekken
+2. **Accel-offsets**: bord in meerdere standen meten (minimaal plat + op zijn kop, liefst 6 standen) → offsets per as
+3. Offsets in **NVS** opslaan zodat ze een reboot overleven
+4. Kalibratie starten via een WS-commando (bijv. `{"cal":1}`), niet automatisch bij boot (want dan moet het bord stil liggen)
+
 ---
 
 ## 🧪 Testpunten Checklist (na solderen)
