@@ -18,6 +18,8 @@
 
   LEGENDA:  ● = gebruikt   ○ = vrij   ⚠ = let op!
 
+⚠ De ESP32 past NIET in een breadboard - verbind met jumperdraden.
+
 ════════════════════════════════════════════════════════════════════════
 MOTOR DRIVER (TB6612FNG)                    ENCODERS (Pololu 12 CPR, 120:1)
 ════════════════════════════════════════════════════════════════════════
@@ -55,6 +57,8 @@ Line R1 (rechtsbinnen) → GPIO 34  ● ADC1   Max 8.4V → 0.4V (veilig)
 Line R2 (rechtsbuiten) → GPIO 35  ● ADC1   Meet op ADC1_CH5 (GPIO33)
 
 ✅ ALLE OP ADC1 - Werkt NORMAAL met WiFi, GEEN workaround nodig!
+⚠ TCRT5000 op 3V3 voeden! GPIO 34-39 zijn input-only en NIET 5V-tolerant.
+  Op 5V: verplicht 1k/2k deler per kanaal.
 
 ═════════════════════════════════════════════════════════════════════════
 STATUS & CONTROL

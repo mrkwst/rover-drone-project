@@ -1,6 +1,6 @@
 # Rover → Drone Project (Familie Project)
 
-**Status:** OTRONIC besteld · Romi-aandrijflijn besteld · Firmware klaar · **wacht op levering**
+**Status:** Elektronica-bring-up **klaar** (flash + WiFi-AP + WebSocket beide richtingen getest) · **onderweg:** Romi-aandrijflijn · **nog bestellen:** XL4015-buck, 2× 18650-houders, 2S BMS, lader
 
 ---
 
@@ -120,6 +120,8 @@ rover-drone/
 10. **Emergency stop op GPIO 3** (niet GPIO 1 - TX0 serial conflict)
 11. **Romi extended backshaft**: motorasje moet achteraan uitsteken, anders past de encodermagneet niet - direct bij uitpakken checken
 12. **TCRT5000 onder de bodemplaat** (Romi-bodemvrijheid ~10mm), 3-5mm boven de grond
+13. ⚠️ **De ESP32 past NIET in een standaard breadboard** (eigen opgave OTRONIC). Gebruik **jumperdraden** naar het bord i.p.v. hem erin te prikken.
+14. ⚠️ **TCRT5000's op 3V3, niet op 5V** — of gebruik een 1k/2k deler op elke uitgang. GPIO 34/35/36/39 zijn **input-only ADC-pinnen en niet 5V-tolerant**; bij 5V-voeding kan de analoge uitgang boven 3,3V komen.
 
 ---
 
@@ -189,6 +191,10 @@ rover-drone/
 | Probleem | Oorzaak | Oplossing |
 |----------|---------|-----------|
 | ESP32 boot niet | GPIO 0/2/12/15 hoog tijdens boot | Check strapping pins, spanningsdelers (buzzer nu op GPIO 32) |
+| AP start (`softAP()` OK) maar niet zichtbaar | **Eigen taak verhongert de WiFi** — de WiFi-taak van de ESP32 draait op **prioriteit 23**; een eigen taak met hogere prioriteit die blokkeert (bv. `pulseIn`) sloopt de beacons | Taakprioriteit **onder 23** zetten (nu 5). Zie plan §2G |
+| Apparaten tonen geen enkel netwerk | **Locatievoorzieningen uit** — Windows én Android tonen de WiFi-lijst alleen met Locatie aan | Instellingen → Privacy → Locatie aan (Windows: `ms-settings:privacy-location`) |
+| ESP32 niet herkend (geen `/dev/ttyUSB`) | CH340 op de **USB 1.1-controller** van een VM | VM op **USB 3.0/3.1** zetten; de CH340 komt dan op xHCI. Zie plan §2F |
+| Netwerk verdwijnt uit de lijst zodra je verbindt | Normaal gedrag van je OS | Je zit erop — het staat dan bij "verbonden"/"huidige verbinding" |
 | Geen WiFi AP | Voeding instabiel | Buck converter checken, 5V meten |
 | Motor draait niet | STBY laag, PWM 0, VM geen spanning | `digitalWrite(STBY,HIGH)`, buck→VM check |
 | Encoder telt niet / dubbel | Pull-up ontbreekt, 1k/2k deler vergeten, beide kanalen geteld | `INPUT_PULLUP`, deler op 14/26, alleen kanaal A tellen |

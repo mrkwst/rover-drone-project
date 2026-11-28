@@ -363,6 +363,19 @@ Afstand sensoren: ~15-20mm tussen middelpunten
 Hoogte boven grond: 3-5mm
 ```
 
+### ⚠️ Voeding van de lijnsensoren
+
+**Zet de TCRT5000's op `3V3`, niet op 5V.**
+
+GPIO **34, 35, 36, 39** zijn **input-only ADC-pinnen en NIET 5V-tolerant**. De modules
+geven hun analoge uitgang op voedingsspanning af, dus bij 5V-voeding kan er **5V op een
+3,3V-pin** komen.
+
+- **3V3-voeding** → uitgang ≤ 3,3V → direct op de ADC, geen deler nodig *(aanbevolen)*
+- **5V-voeding** → **verplicht een 1k/2k deler per kanaal** (4×), net als bij de HC-SR04 Echo
+
+Zelfde regel geldt voor de **encoderprintjes** (zie de encodersectie).
+
 ---
 
 ## 🔍 MPU6050 Oriëntatie
@@ -441,3 +454,6 @@ Let op: Geen magnetometer → yaw drift!
 16. **⚠️ 2S BMS `BM`-pin** moet exact op het middenpunt tussen de twee cellen. Verkeerd aangesloten = geen bescherming of beschadigd bordje.
 17. **⚠️ Nooit aan een 18650 solderen** — hitte beschadigt de cel. Gebruik houdercontacten.
 18. **⚠️ Laden gebeurt in de externe lader**, cellen buiten de rover. Niet via de BMS laden zonder 9 V-bron.
+19. **⚠️ De ESP32 past NIET in een standaard breadboard** — eigen opgave van OTRONIC. Verbind hem met **jumperdraden** naar de opstelling i.p.v. hem erin te prikken.
+20. **⚠️ Lijnsensoren op 3V3** (of 1k/2k deler per kanaal). GPIO 34/35/36/39 zijn input-only en niet 5V-tolerant — zie de TCRT5000-sectie.
+21. **⚠️ WiFi-taak prioriteit**: de WiFi-taak van de ESP32 draait op **prioriteit 23**. Een eigen taak met hogere prioriteit die blokkeert (zoals `pulseIn`) verhongert de WiFi → het AP wordt onzichtbaar. Onze Core-0-taak staat daarom op **5**.
