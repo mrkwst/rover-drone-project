@@ -57,8 +57,9 @@ Line R1 (rechtsbinnen) → GPIO 34  ● ADC1   Max 8.4V → 0.4V (veilig)
 Line R2 (rechtsbuiten) → GPIO 35  ● ADC1   Meet op ADC1_CH5 (GPIO33)
 
 ✅ ALLE OP ADC1 - Werkt NORMAAL met WiFi, GEEN workaround nodig!
-⚠ TCRT5000 op 3V3 voeden! GPIO 34-39 zijn input-only en NIET 5V-tolerant.
-  Op 5V: verplicht 1k/2k deler per kanaal.
+✅ TCRT5000 op 3V3 (BESLISSING) - uitgang < 3,3V, geen delers nodig.
+   GPIO 34-39 zijn input-only en NIET 5V-tolerant.
+HC-SR04 moet 5V - Echo verplicht via 1k/2k deler.
 
 ═════════════════════════════════════════════════════════════════════════
 STATUS & CONTROL

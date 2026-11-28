@@ -97,6 +97,25 @@
                          └─────────────┘
 ```
 
+### Sensorvoeding — **beslissing vastgelegd 2026-11-28**
+
+| Component | Voeding | Waarom |
+|---|---|---|
+| **HC-SR04 ×2** | **5 V** | werkt niet betrouwbaar op 3,3 V. **Echo verplicht via 1k/2k deler** |
+| **TCRT5000 ×4** | **3V3** ⭐ | **gekozen**: uitgang ≤ 3,3 V → direct op de ADC, **geen delers** |
+| Encoderprintjes ×2 | 5 V | mag 2,7–18 V; uitgang via 1k/2k deler |
+| MPU6050 | 3V3 | I²C-niveau's blijven 3,3 V |
+| TB6612FNG VCC | 3V3 | logica |
+
+**Waarom 3V3 voor de lijnsensoren:** ze hangen straks **3–5 mm boven de grond**, dus het
+gereflecteerde IR-signaal is ruim sterk genoeg op 3,3 V. 5 V zou **8 extra weerstanden**
+(4 delers) en een reëel risico op een kapotte pin kosten — voor bereik dat we niet nodig
+hebben.
+
+**Waarom 5 V op een ESP32-pin geen "beetje te veel" is:** de lekstroom via de interne
+beschermdiode tilt de **hele 3,3 V-rail** op → instabiel bord, resets, rare ADC-waarden.
+Het is niet één pin die het niet leuk vindt; je kunt het hele bord slopen.
+
 ---
 
 ## ⚡ Motorspanning: 2S (8,4 V) vs motor (3–6 V)
@@ -363,18 +382,22 @@ Afstand sensoren: ~15-20mm tussen middelpunten
 Hoogte boven grond: 3-5mm
 ```
 
-### ⚠️ Voeding van de lijnsensoren
+### ✅ Voeding van de lijnsensoren — **beslissing: 3V3** (2026-11-28)
 
-**Zet de TCRT5000's op `3V3`, niet op 5V.**
+De TCRT5000's gaan op **3V3**. Daarmee is de analoge uitgang ≤ 3,3 V en kunnen ze
+**direct op de ADC** — géén delers nodig.
 
 GPIO **34, 35, 36, 39** zijn **input-only ADC-pinnen en NIET 5V-tolerant**. De modules
-geven hun analoge uitgang op voedingsspanning af, dus bij 5V-voeding kan er **5V op een
-3,3V-pin** komen.
+geven hun uitgang op voedingsspanning af, dus op 5 V zou er tot 5 V op een 3,3 V-pin
+komen → lekstroom naar de 3,3 V-rail → instabiel bord.
 
-- **3V3-voeding** → uitgang ≤ 3,3V → direct op de ADC, geen deler nodig *(aanbevolen)*
-- **5V-voeding** → **verplicht een 1k/2k deler per kanaal** (4×), net als bij de HC-SR04 Echo
+| Optie | Status |
+|---|---|
+| **3V3-voeding, geen delers** | ✅ **gekozen** |
+| 5V-voeding + 1k/2k deler per kanaal (4×) | verworpen — 8 extra weerstanden, voor bereik dat we niet nodig hebben (sensoren hangen 3–5 mm boven de grond) |
 
-Zelfde regel geldt voor de **encoderprintjes** (zie de encodersectie).
+Zelfde regel geldt voor de **encoderprintjes** — die draaien wél op 5 V en hebben dus
+wél een deler (zie de encodersectie).
 
 ---
 

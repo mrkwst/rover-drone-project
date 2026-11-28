@@ -121,7 +121,7 @@ rover-drone/
 11. **Romi extended backshaft**: motorasje moet achteraan uitsteken, anders past de encodermagneet niet - direct bij uitpakken checken
 12. **TCRT5000 onder de bodemplaat** (Romi-bodemvrijheid ~10mm), 3-5mm boven de grond
 13. ⚠️ **De ESP32 past NIET in een standaard breadboard** (eigen opgave OTRONIC). Gebruik **jumperdraden** naar het bord i.p.v. hem erin te prikken.
-14. ⚠️ **TCRT5000's op 3V3, niet op 5V** — of gebruik een 1k/2k deler op elke uitgang. GPIO 34/35/36/39 zijn **input-only ADC-pinnen en niet 5V-tolerant**; bij 5V-voeding kan de analoge uitgang boven 3,3V komen.
+14. ✅ **TCRT5000's op 3V3** (beslissing 2026-11-28) — uitgang ≤ 3,3 V, dus **geen delers nodig**. GPIO 34/35/36/39 zijn **input-only ADC-pinnen en niet 5V-tolerant**; 5 V zou 4 delers (8 weerstanden) én een opgetilde 3,3 V-rail betekenen, voor bereik dat we niet nodig hebben.
 
 ---
 
